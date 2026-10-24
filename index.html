@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>100 причин, почему я тебя люблю — 3D Галактика</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #020308;
+      color: #ffffff;
+    }
+
+    /* Основной глубокий космос в стиле снимка телескопа Хаббл */
+    body.theme-hubble {
+      background:
+        radial-gradient(ellipse at 47% 48%, rgba(44, 102, 158, 0.30) 0%, rgba(14, 28, 56, 0.18) 38%, rgba(2, 3, 8, 0.98) 76%),
+        radial-gradient(circle at 80% 72%, rgba(210, 95, 30, 0.22) 0%, transparent 38%),
+        radial-gradient(circle at 22% 20%, rgba(180, 90, 35, 0.12) 0%, transparent 28%),
+        #020308;
+    }
+
+    /* Альтернативный режим яркой туманности */
+    body.theme-nebula {
+      background:
+        radial-gradient(ellipse at 48% 48%, rgba(56, 145, 220, 0.42) 0%, rgba(24, 52, 105, 0.26) 44%, rgba(3, 6, 16, 0.98) 80%),
+        radial-gradient(circle at 78% 70%, rgba(245, 125, 42, 0.32) 0%, transparent 45%),
+        #030611;
+    }
+
+    #galaxy-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #galaxy-canvas:active {
+      cursor: grabbing;
+    }
+
+    .vignette-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.72) 100%);
+      z-index: 2;
+    }
+
+    .serif-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    /* Стеклянные космические панели */
+    .glass-panel {
+      background: rgba(8, 13, 26, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 205, 255, 0.22);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.78), inset 0 1px 1px rgba(255, 255, 255, 0.14);
+    }
+
+    /* Центральная надпись в сердце галактики */
+    #nucleus-label {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 5;
+      text-align: center;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .nucleus-badge {
+      background: radial-gradient(ellipse at center, rgba(14, 30, 58, 0.82) 0%, rgba(5, 10, 22, 0.90) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(175, 230, 255, 0.42);
+      box-shadow:
+        0 0 38px rgba(110, 198, 255, 0.38),
+        0 0 75px rgba(56, 189, 248, 0.20),
+        inset 0 0 18px rgba(186, 230, 253, 0.18);
+      padding: 12px 26px;
+      border-radius: 9999px;
+      color: #ffffff;
+      max-width: 320px;
+    }
+
+    .nucleus-subtitle {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.26em;
+      color: #bae6fd;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .nucleus-main-title {
+      font-size: 22px;
+      line-height: 1.18;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 0 14px rgba(186, 230, 253, 0.85);
+    }
+
+    /* Верхняя шапка */
+    .top-bar {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .brand-box {
+      padding: 10px 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .pulse-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      box-shadow: 0 0 14px #7dd3fc;
+      animation: pulseGlow 2s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.7; }
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+    }
+
+    .counter-pill {
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(125, 211, 252, 0.35);
+      font-size: 11px;
+      font-weight: 600;
+      color: #bae6fd;
+    }
+
+    .brand-hint {
+      font-size: 11px;
+      color: rgba(203, 213, 225, 0.88);
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .btn-action {
+      padding: 10px 14px;
+      border-radius: 16px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+      outline: none;
+    }
+
+    .btn-action:hover {
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba(186, 230, 253, 0.4);
+    }
+
+    .btn-action:active {
+      transform: scale(0.95);
+    }
+
+    .btn-gold {
+      color: #fcd34d;
+      font-weight: 600;
+    }
+
+    /* Всплывающий тултип при наведении */
+    #hover-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 25;
+      opacity: 0;
+      transform: translate(-50%, -140%) scale(0.92);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+      padding: 7px 13px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #hover-tooltip.visible {
+      opacity: 1;
+      transform: translate(-50%, -150%) scale(1);
+    }
+
+    #tooltip-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      box-shadow: 0 0 10px #7dd3fc;
+      display: inline-block;
+    }
+
+    /* Карточка выбранной причины */
+    #reason-modal {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-44%) scale(0.96);
+      width: 410px;
+      max-width: calc(100vw - 32px);
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #reason-modal.open {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      border-radius: 26px;
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(125, 211, 252, 0.32);
+    }
+
+    .card-glow {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.22);
+      filter: blur(36px);
+      pointer-events: none;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .modal-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #modal-atom-badge {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      box-shadow: 0 0 12px #7dd3fc;
+      display: inline-block;
+    }
+
+    #modal-number {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #bae6fd;
+    }
+
+    .btn-close-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-close-circle:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .btn-close-circle:active {
+      transform: scale(0.9);
+    }
+
+    .modal-body {
+      margin: 20px 0;
+      min-height: 98px;
+      display: flex;
+      align-items: center;
+    }
+
+    #modal-reason-text {
+      font-size: 27px;
+      line-height: 1.3;
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.10);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    #modal-progress-bar {
+      height: 100%;
+      width: 1%;
+      background: linear-gradient(90deg, #7dd3fc, #fcd34d, #f97316);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .modal-nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.20);
+    }
+
+    .btn-nav:active {
+      transform: scale(0.96);
+    }
+
+    .btn-return-space {
+      margin-top: 10px;
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 13px;
+      background: linear-gradient(90deg, rgba(14, 165, 233, 0.85), rgba(37, 99, 235, 0.85), rgba(79, 70, 229, 0.85));
+      border: 1px solid rgba(186, 230, 253, 0.35);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(14, 165, 233, 0.35);
+      transition: filter 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-return-space:hover {
+      filter: brightness(1.12);
+    }
+
+    .btn-return-space:active {
+      transform: scale(0.98);
+    }
+
+    /* Нижняя панель быстрого поиска */
+    .bottom-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 94%;
+      max-width: 610px;
+      pointer-events: none;
+    }
+
+    .bottom-inner {
+      padding: 10px 16px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: auto;
+      flex-wrap: wrap;
+    }
+
+    .search-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-label {
+      font-size: 12px;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .search-input {
+      width: 66px;
+      padding: 6px 10px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      font-size: 12px;
+      text-align: center;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn-find {
+      padding: 6px 13px;
+      border-radius: 11px;
+      background: rgba(14, 165, 233, 0.85);
+      border: 1px solid rgba(125, 211, 252, 0.35);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-find:hover {
+      background: #38bdf8;
+    }
+
+    .legend-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .btn-random {
+      padding: 7px 14px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #fcd34d, #fbbf24, #f97316);
+      border: none;
+      color: #090d16;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.42);
+      transition: transform 0.15s ease, filter 0.2s ease;
+    }
+
+    .btn-random:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-random:active {
+      transform: scale(0.95);
+    }
+
+    /* Модальное окно со списком всех 100 причин */
+    #all-reasons-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(2, 4, 12, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    #all-reasons-drawer.open {
+      display: flex;
+    }
+
+    .drawer-box {
+      width: 100%;
+      max-width: 920px;
+      max-height: 86vh;
+      border-radius: 26px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .drawer-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .drawer-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    #reasons-grid {
+      padding: 20px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .reason-list-item {
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: #e2e8f0;
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .reason-list-item:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(125, 211, 252, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .reason-num-circle {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #090d16;
+      margin-top: 1px;
+    }
+
+    .reason-item-text {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* Адаптивность для мобильных экранов */
+    @media (max-width: 768px) {
+      .brand-hint, .legend-group, .action-label-text {
+        display: none;
+      }
+      #reason-modal {
+        right: 16px;
+        left: 16px;
+        top: auto;
+        bottom: 84px;
+        width: auto;
+        transform: translateY(20px);
+      }
+      #reason-modal.open {
+        transform: translateY(0);
+      }
+      #modal-reason-text {
+        font-size: 22px;
+      }
+      .nucleus-badge {
+        padding: 10px 18px;
+        max-width: 260px;
+      }
+      .nucleus-main-title {
+        font-size: 18px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(125, 211, 252, 0.35);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="theme-hubble">
+
+  <!-- 3D Холст Галактики -->
+  <canvas id="galaxy-canvas"></canvas>
+
+  <!-- Мягкая космическая виньетка -->
+  <div class="vignette-overlay"></div>
+
+  <!-- Центральная надпись в ядре галактики -->
+  <div id="nucleus-label">
+    <div class="nucleus-badge">
+      <div class="nucleus-subtitle">Сердце нашей галактики</div>
+      <h1 class="serif-title nucleus-main-title">
+        100 причин, почему<br/>я тебя люблю
+      </h1>
+    </div>
+  </div>
+
+  <!-- Всплывающая подсказка при наведении на звезду -->
+  <div id="hover-tooltip" class="glass-panel">
+    <span id="tooltip-dot"></span>
+    <span id="tooltip-text">Звезда №1</span>
+  </div>
+
+  <!-- Верхняя панель управления -->
+  <header class="top-bar">
+    <div class="glass-panel brand-box">
+      <div class="pulse-dot"></div>
+      <div>
+        <div class="brand-title-row">
+          <span class="brand-title">Галактика Любви • 100 Звёзд-Причин</span>
+          <span id="discovered-counter" class="counter-pill">Открыто: 0 / 100</span>
+        </div>
+        <p class="brand-hint">Вращайте космос мышью или пальцем • Нажмите на любую яркую звезду, чтобы приблизиться к причине</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btn-toggle-orbit" class="glass-panel btn-action" title="Остановить или запустить движение орбит">
+        <span id="orbit-status-icon">⏸</span>
+        <span id="orbit-status-text" class="action-label-text">Пауза орбит</span>
+      </button>
+
+      <button id="btn-toggle-theme" class="glass-panel btn-action" title="Переключить яркость туманности">
+        <span id="theme-icon">🌌</span>
+        <span id="theme-text" class="action-label-text">Яркая туманность</span>
+      </button>
+
+      <button id="btn-open-list" class="glass-panel btn-action btn-gold">
+        <span>✦</span>
+        <span>Все 100 причин</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Модальная карточка выбранной причины (открывается при подлёте камеры к звезде) -->
+  <div id="reason-modal">
+    <div class="glass-panel modal-card">
+      <div class="card-glow"></div>
+
+      <div class="modal-header">
+        <div class="modal-badge-group">
+          <span id="modal-atom-badge"></span>
+          <span id="modal-number">Звезда №1 из 100</span>
+        </div>
+        <button id="btn-close-reason" class="btn-close-circle" title="Вернуться к предыдущему ракурсу камеры (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="modal-reason-text" class="serif-title">
+          За твою невероятную улыбку, которая освещает даже самый пасмурный день.
+        </p>
+      </div>
+
+      <div class="progress-track">
+        <div id="modal-progress-bar"></div>
+      </div>
+
+      <div class="modal-nav-row">
+        <button id="btn-prev-reason" class="btn-nav">
+          <span>←</span>
+          <span>Предыдущая</span>
+        </button>
+        <button id="btn-next-reason" class="btn-nav">
+          <span>Следующая</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <button id="btn-return-camera" class="btn-return-space">
+        <span>🔭</span>
+        <span>Вернуться в прежнюю точку космоса</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Нижняя панель поиска звезды по номеру -->
+  <footer class="bottom-bar">
+    <div class="glass-panel bottom-inner">
+      <div class="search-group">
+        <label for="input-reason-num" class="search-label">Звезда №:</label>
+        <input id="input-reason-num" class="search-input" type="number" min="1" max="100" placeholder="1-100" />
+        <button id="btn-go-num" class="btn-find">Найти</button>
+      </div>
+
+      <div class="legend-group">
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#7dd3fc;box-shadow:0 0 8px #7dd3fc;"></span> Голубые
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#fcd34d;box-shadow:0 0 8px #fcd34d;"></span> Золотые
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#fb923c;box-shadow:0 0 8px #fb923c;"></span> Оранжевые
+        </span>
+      </div>
+
+      <button id="btn-random-reason" class="btn-random">✨ Случайная звезда</button>
+    </div>
+  </footer>
+
+  <!-- Всплывающее окно со списком всех 100 причин -->
+  <div id="all-reasons-drawer">
+    <div class="glass-panel drawer-box">
+      <div class="drawer-header">
+        <div>
+          <h2 class="serif-title drawer-title">Все 100 причин, почему я тебя люблю</h2>
+          <p class="drawer-subtitle">Нажмите на любую причину, чтобы камера подлетела к её звезде в галактике</p>
+        </div>
+        <button id="btn-close-drawer" class="btn-close-circle">✕</button>
+      </div>
+      <div id="reasons-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    /* Полный массив из 100 причин любви */
+    const REASONS = [
+      "За твою невероятную улыбку, которая освещает даже самый пасмурный день.",
+      "За то, как нежно и тепло ты смотришь на меня.",
+      "За твой искренний и заразительный смех, от которого на душе становится светло.",
+      "За твоё доброе, чуткое и огромное сердце.",
+      "За то, что рядом с тобой я всегда чувствую себя как дома.",
+      "За твои самые тёплые и крепкие объятия на свете.",
+      "За то, как ты умеешь внимательно слушать и слышать меня.",
+      "За твою безусловную поддержку в любую трудную минуту.",
+      "За то, что ты веришь в меня даже больше, чем я сам.",
+      "За глубину твоих прекрасных глаз, в которых хочется утонуть.",
+      "За твой ласковый голос, который мгновенно успокаивает меня.",
+      "За то, как трогательно ты заботишься обо мне в мелочах.",
+      "За наши долгие разговоры обо всём на свете до глубокой ночи.",
+      "За то, что с тобой удивительно уютно даже просто молчать.",
+      "За твоё потрясающее чувство юмора и наши общие шутки.",
+      "За твою искренность и открытость в каждом слове.",
+      "За то, как ты вдохновляешь меня становиться лучше каждый день.",
+      "За твою неповторимую грацию и красоту в каждом движении.",
+      "За то, как ты радуешься простым и светлым мелочам жизни.",
+      "За твою мудрость и умение находить выход из любой ситуации.",
+      "За то, как крепко ты держишь меня за руку на прогулках.",
+      "За твои нежные поцелуи, от которых замирает сердце.",
+      "За то, что ты принимаешь меня настоящим со всеми особенностями.",
+      "За твой удивительный вкус и чувство прекрасного.",
+      "За то, как страстно ты увлекаешься любимым делом.",
+      "За твои смелые мечты, которые мы обязательно воплотим вместе.",
+      "За то, что каждый совместный день ты превращаешь в маленький праздник.",
+      "За твоё ангельское терпение и умение прощать.",
+      "За то, как мило ты морщишь нос, когда смеёшься или удивляешься.",
+      "За твой чарующий аромат, который я узнаю из тысячи.",
+      "За то, как ты умеешь создавать тепло и уют вокруг себя.",
+      "За наши незабываемые путешествия и спонтанные приключения.",
+      "За то, что ты всегда на моей стороне, что бы ни происходило.",
+      "За твою честность и верность нашим чувствам.",
+      "За то, как светятся твои глаза, когда ты говоришь о том, что любишь.",
+      "За твои утренние сообщения, с которых так приятно начинать день.",
+      "За то, как трогательно ты переживаешь за близких людей.",
+      "За твою внутреннюю силу и удивительную стойкость.",
+      "За твою нежность, которая растапливает любой холод.",
+      "За то, как мы понимаем друг друга буквально с полуслова и одного взгляда.",
+      "За наши общие планы и мечты о прекрасном будущем.",
+      "За то, как ты умеешь удивлять и делать приятные сюрпризы.",
+      "За твою естественную красоту в любое время дня и ночи.",
+      "За то, что рядом с тобой время летит совершенно незаметно.",
+      "За твои тёплые ладони, которые я так люблю согревать.",
+      "За то, как бережно ты хранишь наши общие воспоминания.",
+      "За твою смелость быть собой в любой компании.",
+      "За то, как ты умеешь поднять мне настроение за одну секунду.",
+      "За наши уютные вечера за просмотром любимых фильмов.",
+      "За то, что ты делаешь этот мир добрее и светлее.",
+      "За твою интуицию и тонкое понимание моих чувств.",
+      "За то, как красиво ты смотришься в лучах закатного солнца.",
+      "За твою энергию, которая заряжает всё вокруг жизнью.",
+      "За то, что с тобой любая прогулка превращается в романтическое свидание.",
+      "За твоё уважение к моим мыслям, интересам и мечтам.",
+      "За то, как мило ты выглядишь, когда только что проснулась.",
+      "За твоё умение видеть хорошее даже в сложные времена.",
+      "За то, что ты — мой самый близкий и лучший друг.",
+      "За твои мудрые советы, которые всегда попадают в самую точку.",
+      "За то, как ты умеешь радоваться моим успехам и победам.",
+      "За твою очаровательную застенчивость в особенные моменты.",
+      "За то, что ты привносишь гармонию и покой в мою душу.",
+      "За наши любимые песни, которые теперь навсегда ассоциируются с тобой.",
+      "За то, как ты бережно относишься к природе и всему живому.",
+      "За твой неповторимый стиль и очарование.",
+      "За то, что с тобой не страшно идти в любую неизвестность.",
+      "За твоё умение любить всем сердцем, без остатка.",
+      "За то, как ты произносишь моё имя — так не умеет никто другой.",
+      "За твои случайные прикосновения, от которых бегут мурашки.",
+      "За то, что ты делаешь меня самым счастливым человеком на Земле.",
+      "За твою любознательность и интерес к новым открытиям.",
+      "За то, как мы вместе смеёмся до слёз над пустяками.",
+      "За твою деликатность и душевную чуткость.",
+      "За то, что ты умеешь превратить обычный ужин в особенный вечер.",
+      "За твой светлый ум и глубокие, интересные мысли.",
+      "За то, что даже на расстоянии я всегда чувствую твоё тепло.",
+      "За твою готовность прийти на помощь в любую секунду.",
+      "За то, как ты украшаешь собой каждую фотографию.",
+      "За твою веру в настоящую, чистую и вечную любовь.",
+      "За то, что ты научила меня ценить каждое мгновение жизни.",
+      "За твои глаза, в которых я вижу наше общее счастье.",
+      "За то, как ты умеешь мириться и беречь наши отношения.",
+      "За твою мягкость и женственность, которые покоряют меня снова и снова.",
+      "За то, что каждое свидание с тобой волнительно, как в первый раз.",
+      "За твою щедрость на добрые слова и комплименты.",
+      "За то, что ты — моё главное вдохновение и моя муза.",
+      "За наши маленькие традиции, которые принадлежат только нам двоим.",
+      "За то, как ты умеешь создать праздник из самого обычного дня.",
+      "За твою душевную чистоту и благородство.",
+      "За то, что с тобой я наконец-то понял, что такое настоящая любовь.",
+      "За твои тёплые слова перед сном, которые дарят лучшие сны.",
+      "За то, что ты никогда не перестаёшь меня восхищать.",
+      "За твою уникальность — ведь такой, как ты, больше нет во всей Вселенной.",
+      "За то, что каждая минута рядом с тобой бесценна.",
+      "За то, как гармонично мы дополняем друг друга во всём.",
+      "За твою светлую энергетику, к которой тянется моё сердце.",
+      "За то, с каким теплом ты относишься к нашему общему счастью.",
+      "За то, что с каждым днём я открываю в тебе новые прекрасные грани.",
+      "За то, что наша история — самое лучшее, что случалось в моей жизни.",
+      "И просто за то, что ты есть в этом мире и рядом со мной."
+    ];
+
+    /* Палитра звёзд с прикреплённого космического снимка Хаббла */
+    const STAR_PALETTES = [
+      {
+        name: "Голубой сверхгигант",
+        hex: "#7dd3fc",
+        core: "#ffffff",
+        mid: "rgba(125, 211, 252, 0.92)",
+        outer: "rgba(56, 189, 248, 0)"
+      },
+      {
+        name: "Золотая звезда",
+        hex: "#fcd34d",
+        core: "#fffbeb",
+        mid: "rgba(252, 211, 77, 0.92)",
+        outer: "rgba(245, 158, 11, 0)"
+      },
+      {
+        name: "Оранжевый гигант",
+        hex: "#fb923c",
+        core: "#fff7ed",
+        mid: "rgba(251, 146, 60, 0.92)",
+        outer: "rgba(234, 88, 12, 0)"
+      }
+    ];
+
+    const canvas = document.getElementById("galaxy-canvas");
+    const ctx = canvas.getContext("2d");
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    /* Параметры 3D-камеры и плавной интерполяции для подлёта и точного возврата */
+    const cam = {
+      yaw: 0.15,
+      pitch: 0.24,
+      distance: 46,
+      targetX: 0,
+      targetY: 0,
+      targetZ: 0,
+      /* Целевые значения для плавного перелёта */
+      destYaw: 0.15,
+      destPitch: 0.24,
+      destDistance: 46,
+      destTargetX: 0,
+      destTargetY: 0,
+      destTargetZ: 0,
+      /* Сохранённая точка камеры перед приближением к звезде */
+      savedYaw: 0.15,
+      savedPitch: 0.24,
+      savedDistance: 46,
+      savedTargetX: 0,
+      savedTargetY: 0,
+      savedTargetZ: 0
+    };
+
+    let isZoomedIn = false;
+    let activeStarIndex = -1;
+    let hoveredStarIndex = -1;
+    let userPausedOrbits = false;
+    let orbitSpeedMultiplier = 1.0;
+    let targetOrbitSpeed = 1.0;
+    const discoveredSet = new Set();
+
+    /* Массивы объектов 3D-сцены */
+    const deepSpaceStars = [];
+    const hubbleBeaconStars = [];
+    const mainRingParticles = [];
+    const innerCoreParticles = [];
+    const companionSpiralParticles = [];
+    const reasonStars = [];
+    const orbitCurves = [];
+
+    /* Предварительно отрендеренные спрайты свечения для максимального FPS */
+    const glowSprites = {};
+
+    function createRadialSprite(size, innerColor, midColor, outerColor, withSpikes) {
+      const off = document.createElement("canvas");
+      off.width = size;
+      off.height = size;
+      const octx = off.getContext("2d");
+      const c = size / 2;
+
+      const grad = octx.createRadialGradient(c, c, 0, c, c, c);
+      grad.addColorStop(0.0, innerColor);
+      grad.addColorStop(0.22, midColor);
+      grad.addColorStop(0.58, outerColor);
+      grad.addColorStop(1.0, "rgba(0,0,0,0)");
+
+      octx.fillStyle = grad;
+      octx.fillRect(0, 0, size, size);
+
+      if (withSpikes) {
+        /* 4-лучевой дифракционный крест телескопа Хаббл */
+        octx.save();
+        octx.translate(c, c);
+        for (let i = 0; i < 2; i++) {
+          const spikeGrad = octx.createLinearGradient(-c, 0, c, 0);
+          spikeGrad.addColorStop(0.0, "rgba(255,255,255,0)");
+          spikeGrad.addColorStop(0.35, midColor);
+          spikeGrad.addColorStop(0.5, "#ffffff");
+          spikeGrad.addColorStop(0.65, midColor);
+          spikeGrad.addColorStop(1.0, "rgba(255,255,255,0)");
+
+          octx.fillStyle = spikeGrad;
+          octx.beginPath();
+          octx.ellipse(0, 0, c * 0.96, Math.max(1.4, size * 0.015), 0, 0, Math.PI * 2);
+          octx.fill();
+          octx.rotate(Math.PI / 2);
+        }
+
+        /* Тонкие диагональные лучи */
+        octx.rotate(Math.PI / 4);
+        for (let i = 0; i < 2; i++) {
+          const dGrad = octx.createLinearGradient(-c * 0.45, 0, c * 0.45, 0);
+          dGrad.addColorStop(0.0, "rgba(255,255,255,0)");
+          dGrad.addColorStop(0.5, "rgba(255,255,255,0.75)");
+          dGrad.addColorStop(1.0, "rgba(255,255,255,0)");
+          octx.fillStyle = dGrad;
+          octx.beginPath();
+          octx.ellipse(0, 0, c * 0.45, Math.max(0.9, size * 0.008), 0, 0, Math.PI * 2);
+          octx.fill();
+          octx.rotate(Math.PI / 2);
+        }
+        octx.restore();
+      }
+
+      return off;
+    }
+
+    function initSprites() {
+      glowSprites.coreBlue = createRadialSprite(
+        256,
+        "#ffffff",
+        "rgba(155, 220, 255, 0.72)",
+        "rgba(37, 99, 235, 0.14)",
+        false
+      );
+      glowSprites.coreOrange = createRadialSprite(
+        256,
+        "#fffbeb",
+        "rgba(251, 146, 60, 0.85)",
+        "rgba(180, 62, 18, 0.16)",
+        false
+      );
+      glowSprites.dustBlue = createRadialSprite(
+        64,
+        "#ffffff",
+        "rgba(147, 210, 255, 0.65)",
+        "rgba(56, 189, 248, 0.08)",
+        false
+      );
+      glowSprites.dustSilver = createRadialSprite(
+        64,
+        "#ffffff",
+        "rgba(226, 232, 240, 0.65)",
+        "rgba(148, 163, 184, 0.06)",
+        false
+      );
+      glowSprites.dustGold = createRadialSprite(
+        64,
+        "#fffbeb",
+        "rgba(252, 211, 77, 0.68)",
+        "rgba(217, 119, 6, 0.08)",
+        false
+      );
+      glowSprites.dustCopper = createRadialSprite(
+        64,
+        "#ffedd5",
+        "rgba(234, 88, 12, 0.72)",
+        "rgba(154, 52, 18, 0.10)",
+        false
+      );
+
+      /* Спрайты с лучами Хаббла для 3 типов звёзд-причин */
+      glowSprites.star0 = createRadialSprite(
+        160,
+        STAR_PALETTES[0].core,
+        STAR_PALETTES[0].mid,
+        STAR_PALETTES[0].outer,
+        true
+      );
+      glowSprites.star1 = createRadialSprite(
+        160,
+        STAR_PALETTES[1].core,
+        STAR_PALETTES[1].mid,
+        STAR_PALETTES[1].outer,
+        true
+      );
+      glowSprites.star2 = createRadialSprite(
+        160,
+        STAR_PALETTES[2].core,
+        STAR_PALETTES[2].mid,
+        STAR_PALETTES[2].outer,
+        true
+      );
+    }
+
+    /* Поворот точки (x,y,z) вокруг осей X, Y, Z */
+    function rotatePoint3D(x, y, z, rx, ry, rz) {
+      /* Вокруг X */
+      let y1 = y * Math.cos(rx) - z * Math.sin(rx);
+      let z1 = y * Math.sin(rx) + z * Math.cos(rx);
+      let x1 = x;
+      /* Вокруг Y */
+      let x2 = x1 * Math.cos(ry) + z1 * Math.sin(ry);
+      let z2 = -x1 * Math.sin(ry) + z1 * Math.cos(ry);
+      let y2 = y1;
+      /* Вокруг Z */
+      let x3 = x2 * Math.cos(rz) - y2 * Math.sin(rz);
+      let y3 = x2 * Math.sin(rz) + y2 * Math.cos(rz);
+      let z3 = z2;
+      return { x: x3, y: y3, z: z3 };
+    }
+
+    /* Построение всей 3D-галактики по образцу вашего фото */
+    function buildGalaxyScene() {
+      /* 1. Фоновые звёзды глубокого космоса */
+      for (let i = 0; i < 1100; i++) {
+        const r = 65 + Math.random() * 140;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const typeRand = Math.random();
+        let sprite = glowSprites.dustSilver;
+        if (typeRand < 0.45) sprite = glowSprites.dustBlue;
+        else if (typeRand > 0.78) sprite = glowSprites.dustGold;
+
+        deepSpaceStars.push({
+          x: r * Math.sin(phi) * Math.cos(theta),
+          y: r * Math.sin(phi) * Math.sin(theta),
+          z: r * Math.cos(phi),
+          size: 0.5 + Math.random() * 1.4,
+          alpha: 0.35 + Math.random() * 0.65,
+          sprite: sprite
+        });
+      }
+
+      /* Яркие фоновые звёзды-маяки с лучами Хаббла (как в углах прикреплённого фото) */
+      const beacons = [
+        { x: 38, y: -21, z: -26, size: 8.5, sprite: glowSprites.star0 },
+        { x: -22, y: -17, z: -24, size: 7.2, sprite: glowSprites.star2 },
+        { x: -2.2, y: -15.5, z: -22, size: 4.0, sprite: glowSprites.star0 },
+        { x: 2.3, y: -15.2, z: -22, size: 3.8, sprite: glowSprites.star0 },
+        { x: -32, y: 14, z: -28, size: 5.2, sprite: glowSprites.star1 },
+        { x: 14, y: 18, z: -26, size: 5.5, sprite: glowSprites.star2 }
+      ];
+      beacons.forEach((b) => hubbleBeaconStars.push(b));
+
+      /* 2. Внутреннее пылевое кольцо вокруг бело-голубого ядра */
+      for (let i = 0; i < 380; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const rad = 3.6 + (Math.random() - 0.5) * 1.8;
+        const lx = Math.cos(angle) * rad * 1.32;
+        const lz = Math.sin(angle) * rad * 0.85;
+        const ly = (Math.random() - 0.5) * 0.75;
+        const p = rotatePoint3D(lx, ly, lz, 0.22, 0, -0.28);
+
+        innerCoreParticles.push({
+          x: p.x,
+          y: p.y,
+          z: p.z,
+          size: 0.65 + Math.random() * 0.8,
+          alpha: 0.45 + Math.random() * 0.45,
+          sprite: Math.random() < 0.75 ? glowSprites.dustBlue : glowSprites.dustGold
+        });
+      }
+
+      /* 3. Внешнее серебристо-голубое галактическое кольцо (как дуга звёздной пыли вокруг центра на фото) */
+      for (let i = 0; i < 1650; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spread = (Math.random() - 0.5) * 4.4 + (Math.random() - 0.5) * 2.4;
+        const baseR = 18.2 + spread;
+        const lx = Math.cos(angle) * baseR * 1.34;
+        const lz = Math.sin(angle) * baseR * 0.84;
+        const ly = (Math.random() - 0.5) * 2.5 + Math.sin(angle * 2) * 0.85;
+
+        const p = rotatePoint3D(lx, ly, lz, 0.22, 0, -0.28);
+        const rChoice = Math.random();
+        let sprite = glowSprites.dustBlue;
+        if (rChoice > 0.62 && rChoice <= 0.88) sprite = glowSprites.dustSilver;
+        else if (rChoice > 0.88) sprite = glowSprites.dustGold;
+
+        mainRingParticles.push({
+          x: p.x,
+          y: p.y,
+          z: p.z,
+          size: 0.75 + Math.random() * 1.35,
+          alpha: 0.35 + Math.random() * 0.55,
+          sprite: sprite
+        });
+      }
+
+      /* 4. Вторая золотисто-оранжевая спиральная галактика справа внизу (как на фото) */
+      const compCenter = { x: 22.5, y: 9.8, z: -18.0 };
+      for (let i = 0; i < 900; i++) {
+        const ratio = Math.pow(Math.random(), 0.78);
+        const radius = 0.5 + ratio * 9.8;
+        const arm = i % 2;
+        const spinAngle = radius * 1.38 + arm * Math.PI;
+        const jitter = (Math.random() - 0.5) * 1.25;
+
+        const lx = Math.cos(spinAngle + jitter * 0.38) * radius;
+        const lz = Math.sin(spinAngle + jitter * 0.38) * radius;
+        const ly = (Math.random() - 0.5) * 0.42;
+
+        /* Наклон плоскости спиральной галактики точно как на фото */
+        const rot = rotatePoint3D(lx, ly, lz, 0.82, -0.22, 0.24);
+
+        let sprite = glowSprites.dustCopper;
+        if (ratio < 0.28) sprite = glowSprites.dustGold;
+        else if (ratio > 0.74) sprite = glowSprites.dustBlue;
+
+        companionSpiralParticles.push({
+          localX: lx,
+          localY: ly,
+          localZ: lz,
+          x: compCenter.x + rot.x,
+          y: compCenter.y + rot.y,
+          z: compCenter.z + rot.z,
+          size: 0.65 + Math.random() * 1.15,
+          alpha: 0.5 + Math.random() * 0.5,
+          sprite: sprite
+        });
+      }
+
+      /* 5. Ровно 100 интерактивных звёзд-причин на 25 наклонных 3D-орбитах */
+      const totalOrbits = 25;
+      const starsPerOrbit = 4;
+      let starIdx = 0;
+
+      for (let o = 0; o < totalOrbits; o++) {
+        const tiltX = ((o * 1.6180339) % 1) * Math.PI * 0.56 - 0.28;
+        const tiltY = (o / totalOrbits) * Math.PI * 2;
+        const tiltZ = Math.sin(o * 2.1) * 0.44;
+
+        const layerRatio = o / (totalOrbits - 1);
+        const radiusX = 5.4 + layerRatio * 14.2;
+        const radiusZ = radiusX * (0.74 + (o % 3) * 0.07);
+
+        /* Точки для тонкой линии орбиты */
+        if (o % 2 === 0) {
+          const pts = [];
+          const steps = 44;
+          for (let s = 0; s <= steps; s++) {
+            const a = (s / steps) * Math.PI * 2;
+            const p = rotatePoint3D(
+              Math.cos(a) * radiusX,
+              0,
+              Math.sin(a) * radiusZ,
+              tiltX,
+              tiltY,
+              tiltZ
+            );
+            pts.push(p);
+          }
+          orbitCurves.push(pts);
+        }
+
+        for (let s = 0; s < starsPerOrbit; s++) {
+          if (starIdx >= 100) break;
+          const paletteIdx = starIdx % 3;
+          const palette = STAR_PALETTES[paletteIdx];
+          const baseAngle = (s / starsPerOrbit) * Math.PI * 2 + (o * 0.57) % (Math.PI * 2);
+          const angularSpeed = (0.10 + (o % 5) * 0.022) * (o % 2 === 0 ? 1 : -1);
+
+          const pos = rotatePoint3D(
+            Math.cos(baseAngle) * radiusX,
+            0,
+            Math.sin(baseAngle) * radiusZ,
+            tiltX,
+            tiltY,
+            tiltZ
+          );
+
+          reasonStars.push({
+            index: starIdx,
+            number: starIdx + 1,
+            reason: REASONS[starIdx],
+            paletteIdx: paletteIdx,
+            palette: palette,
+            sprite: glowSprites["star" + paletteIdx],
+            radiusX: radiusX,
+            radiusZ: radiusZ,
+            tiltX: tiltX,
+            tiltY: tiltY,
+            tiltZ: tiltZ,
+            angle: baseAngle,
+            angularSpeed: angularSpeed,
+            x: pos.x,
+            y: pos.y,
+            z: pos.z,
+            screenX: 0,
+            screenY: 0,
+            screenScale: 1,
+            visible: false,
+            twinklePhase: Math.random() * Math.PI * 2
+          });
+
+          starIdx++;
+        }
+      }
+    }
+
+    /* Проекция 3D-точки мира (wx, wy, wz) в 2D-координаты экрана с учётом вращения камеры */
+    function project3D(wx, wy, wz, cosYaw, sinYaw, cosPitch, sinPitch, fovScale) {
+      const dx = wx - cam.targetX;
+      const dy = wy - cam.targetY;
+      const dz = wz - cam.targetZ;
+
+      /* Вращение вокруг Y (yaw) */
+      const x1 = dx * cosYaw - dz * sinYaw;
+      const z1 = dx * sinYaw + dz * cosYaw;
+
+      /* Вращение вокруг X (pitch) */
+      const y2 = dy * cosPitch - z1 * sinPitch;
+      const z2 = dy * sinPitch + z1 * cosPitch;
+
+      const depth = z2 + cam.distance;
+      if (depth <= 0.4) {
+        return { visible: false, x: 0, y: 0, depth: depth, scale: 0 };
+      }
+
+      const scale = fovScale / depth;
+      return {
+        visible: true,
+        x: width * 0.5 + x1 * scale,
+        y: height * 0.5 + y2 * scale,
+        depth: depth,
+        scale: scale
+      };
+    }
+
+    /* Главный цикл рендеринга 3D-галактики */
+    let lastTime = performance.now();
+
+    function renderLoop(now) {
+      requestAnimationFrame(renderLoop);
+
+      const dt = Math.min((now - lastTime) * 0.001, 0.1);
+      lastTime = now;
+      const elapsed = now * 0.001;
+
+      /* Плавная интерполяция скорости орбит и координат камеры */
+      orbitSpeedMultiplier += (targetOrbitSpeed - orbitSpeedMultiplier) * Math.min(1, dt * 6);
+
+      const smoothFactor = Math.min(1, dt * 6.5);
+      cam.yaw += (cam.destYaw - cam.yaw) * smoothFactor;
+      cam.pitch += (cam.destPitch - cam.pitch) * smoothFactor;
+      cam.distance += (cam.destDistance - cam.distance) * smoothFactor;
+      cam.targetX += (cam.destTargetX - cam.targetX) * smoothFactor;
+      cam.targetY += (cam.destTargetY - cam.targetY) * smoothFactor;
+      cam.targetZ += (cam.destTargetZ - cam.targetZ) * smoothFactor;
+
+      /* Обновляем позиции 100 звёзд на их 3D-орбитах */
+      if (orbitSpeedMultiplier > 0.001) {
+        const effDt = dt * orbitSpeedMultiplier;
+        for (let i = 0; i < reasonStars.length; i++) {
+          const st = reasonStars[i];
+          st.angle += st.angularSpeed * effDt;
+          const p = rotatePoint3D(
+            Math.cos(st.angle) * st.radiusX,
+            0,
+            Math.sin(st.angle) * st.radiusZ,
+            st.tiltX,
+            st.tiltY,
+            st.tiltZ
+          );
+          st.x = p.x;
+          st.y = p.y;
+          st.z = p.z;
+        }
+      }
+
+      /* Если мы в режиме приближения к звезде, держим фокус точно на ней */
+      if (isZoomedIn && activeStarIndex !== -1) {
+        const activeStar = reasonStars[activeStarIndex];
+        cam.destTargetX = activeStar.x;
+        cam.destTargetY = activeStar.y;
+        cam.destTargetZ = activeStar.z;
+      }
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cosYaw = Math.cos(cam.yaw);
+      const sinYaw = Math.sin(cam.yaw);
+      const cosPitch = Math.cos(cam.pitch);
+      const sinPitch = Math.sin(cam.pitch);
+      const fovScale = Math.min(width, height) * 0.92;
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+
+      /* 1. Рисуем тонкие галактические орбиты */
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(125, 211, 252, 0.065)";
+      for (let i = 0; i < orbitCurves.length; i++) {
+        const curve = orbitCurves[i];
+        ctx.beginPath();
+        let started = false;
+        for (let j = 0; j < curve.length; j++) {
+          const pt = project3D(
+            curve[j].x,
+            curve[j].y,
+            curve[j].z,
+            cosYaw,
+            sinYaw,
+            cosPitch,
+            sinPitch,
+            fovScale
+          );
+          if (pt.visible) {
+            if (!started) {
+              ctx.moveTo(pt.x, pt.y);
+              started = true;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            started = false;
+          }
+        }
+        ctx.stroke();
+      }
+
+      /* 2. Рисуем звёзды глубокого космоса на фоне */
+      for (let i = 0; i < deepSpaceStars.length; i++) {
+        const s = deepSpaceStars[i];
+        const pt = project3D(s.x, s.y, s.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        if (pt.visible && pt.x > -40 && pt.x < width + 40 && pt.y > -40 && pt.y < height + 40) {
+          const drawSize = Math.max(1.8, s.size * pt.scale * 0.45);
+          ctx.globalAlpha = s.alpha;
+          ctx.drawImage(s.sprite, pt.x - drawSize * 0.5, pt.y - drawSize * 0.5, drawSize, drawSize);
+        }
+      }
+
+      /* 3. Рисуем яркие фоновые звёзды с лучами Хаббла */
+      for (let i = 0; i < hubbleBeaconStars.length; i++) {
+        const b = hubbleBeaconStars[i];
+        const pt = project3D(b.x, b.y, b.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        if (pt.visible) {
+          const drawSize = b.size * pt.scale;
+          ctx.globalAlpha = 0.88;
+          ctx.drawImage(b.sprite, pt.x - drawSize * 0.5, pt.y - drawSize * 0.5, drawSize, drawSize);
+        }
+      }
+
+      /* 4. Рисуем золотисто-оранжевую спиральную галактику справа внизу */
+      const compCenterPt = project3D(22.5, 9.8, -18.0, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+      if (compCenterPt.visible) {
+        const coreSize = 11.5 * compCenterPt.scale;
+        ctx.globalAlpha = 0.92;
+        ctx.drawImage(
+          glowSprites.coreOrange,
+          compCenterPt.x - coreSize * 0.5,
+          compCenterPt.y - coreSize * 0.5,
+          coreSize,
+          coreSize
+        );
+      }
+
+      for (let i = 0; i < companionSpiralParticles.length; i++) {
+        const p = companionSpiralParticles[i];
+        const pt = project3D(p.x, p.y, p.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        if (pt.visible && pt.x > -30 && pt.x < width + 30 && pt.y > -30 && pt.y < height + 30) {
+          const drawSize = Math.max(1.8, p.size * pt.scale * 0.52);
+          ctx.globalAlpha = p.alpha;
+          ctx.drawImage(p.sprite, pt.x - drawSize * 0.5, pt.y - drawSize * 0.5, drawSize, drawSize);
+        }
+      }
+
+      /* 5. Рисуем центральное бело-голубое галактическое ядро и внутреннее кольцо */
+      const corePt = project3D(0, 0, 0, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+      if (corePt.visible) {
+        const pulse = 1 + Math.sin(elapsed * 2.0) * 0.04;
+        const outerGlowSize = 18.0 * corePt.scale * pulse;
+        ctx.globalAlpha = 0.88;
+        ctx.drawImage(
+          glowSprites.coreBlue,
+          corePt.x - outerGlowSize * 0.5,
+          corePt.y - outerGlowSize * 0.5,
+          outerGlowSize,
+          outerGlowSize
+        );
+
+        /* Привязываем плашку "100 причин почему я тебя люблю" к центру ядра */
+        const labelEl = document.getElementById("nucleus-label");
+        labelEl.style.left = corePt.x + "px";
+        labelEl.style.top = corePt.y + "px";
+      }
+
+      for (let i = 0; i < innerCoreParticles.length; i++) {
+        const p = innerCoreParticles[i];
+        const pt = project3D(p.x, p.y, p.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        if (pt.visible) {
+          const drawSize = Math.max(2.0, p.size * pt.scale * 0.5);
+          ctx.globalAlpha = p.alpha;
+          ctx.drawImage(p.sprite, pt.x - drawSize * 0.5, pt.y - drawSize * 0.5, drawSize, drawSize);
+        }
+      }
+
+      /* 6. Рисуем внешнее серебристо-голубое кольцо главной галактики */
+      for (let i = 0; i < mainRingParticles.length; i++) {
+        const p = mainRingParticles[i];
+        const pt = project3D(p.x, p.y, p.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        if (pt.visible && pt.x > -40 && pt.x < width + 40 && pt.y > -40 && pt.y < height + 40) {
+          const drawSize = Math.max(2.0, p.size * pt.scale * 0.55);
+          ctx.globalAlpha = p.alpha;
+          ctx.drawImage(p.sprite, pt.x - drawSize * 0.5, pt.y - drawSize * 0.5, drawSize, drawSize);
+        }
+      }
+
+      /* 7. Сортируем по глубине и рисуем 100 интерактивных звёзд-причин */
+      const projectedStars = [];
+      for (let i = 0; i < reasonStars.length; i++) {
+        const st = reasonStars[i];
+        const pt = project3D(st.x, st.y, st.z, cosYaw, sinYaw, cosPitch, sinPitch, fovScale);
+        st.screenX = pt.x;
+        st.screenY = pt.y;
+        st.screenScale = pt.scale;
+        st.visible = pt.visible;
+        if (pt.visible) {
+          projectedStars.push({ star: st, depth: pt.depth });
+        }
+      }
+
+      projectedStars.sort((a, b) => b.depth - a.depth);
+
+      for (let i = 0; i < projectedStars.length; i++) {
+        const st = projectedStars[i].star;
+        const isHovered = st.index === hoveredStarIndex;
+        const isActive = st.index === activeStarIndex;
+
+        const twinkle = 1 + Math.sin(elapsed * 3.1 + st.twinklePhase) * 0.14;
+        let mult = twinkle;
+        if (isHovered) mult = 1.55;
+        if (isActive) mult = 1.85;
+
+        const drawSize = Math.max(14, 3.2 * st.screenScale * mult);
+        ctx.globalAlpha = isActive || isHovered ? 1.0 : 0.92;
+        ctx.drawImage(
+          st.sprite,
+          st.screenX - drawSize * 0.5,
+          st.screenY - drawSize * 0.5,
+          drawSize,
+          drawSize
+        );
+
+        /* Если эта звезда выбрана или под курсором, рисуем астрономический ореол вокруг неё */
+        if (isActive || isHovered) {
+          const ringRadius = Math.max(12, 0.72 * st.screenScale);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(st.screenX, st.screenY, ringRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = st.palette.hex;
+          ctx.lineWidth = isActive ? 2.2 : 1.5;
+          ctx.stroke();
+
+          if (isActive) {
+            ctx.beginPath();
+            ctx.setLineDash([6, 5]);
+            ctx.arc(st.screenX, st.screenY, ringRadius * 1.32, elapsed * 1.4, elapsed * 1.4 + Math.PI * 2);
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    /* ============================================================================
+       УПРАВЛЕНИЕ МЫШЬЮ И КАСАНИЯМИ: ВРАЩЕНИЕ, ЗУМ, НАВЕДЕНИЕ И ВЫБОР ЗВЕЗДЫ
+       ============================================================================ */
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let pinchStartDist = 0;
+
+    function findNearestStar(clientX, clientY) {
+      let bestIdx = -1;
+      let minDist = 24;
+      for (let i = 0; i < reasonStars.length; i++) {
+        const st = reasonStars[i];
+        if (!st.visible) continue;
+        const d = Math.hypot(clientX - st.screenX, clientY - st.screenY);
+        if (d < minDist) {
+          minDist = d;
+          bestIdx = st.index;
+        }
+      }
+      return bestIdx;
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (isDragging) {
+        const dx = e.clientX - lastPointerX;
+        const dy = e.clientY - lastPointerY;
+        lastPointerX = e.clientX;
+        lastPointerY = e.clientY;
+
+        cam.destYaw -= dx * 0.0065;
+        cam.destPitch = Math.max(-1.35, Math.min(1.35, cam.destPitch + dy * 0.0065));
+        return;
+      }
+
+      /* Проверяем наведение курсора на любую из 100 звёзд */
+      const hitIdx = findNearestStar(e.clientX, e.clientY);
+      const tooltip = document.getElementById("hover-tooltip");
+
+      if (hitIdx !== -1) {
+        hoveredStarIndex = hitIdx;
+        canvas.style.cursor = "pointer";
+        const st = reasonStars[hitIdx];
+        document.getElementById("tooltip-text").textContent = "Звезда №" + st.number + " • " + st.palette.name;
+        document.getElementById("tooltip-dot").style.background = st.palette.hex;
+        document.getElementById("tooltip-dot").style.boxShadow = "0 0 10px " + st.palette.hex;
+        tooltip.style.left = e.clientX + "px";
+        tooltip.style.top = e.clientY + "px";
+        tooltip.classList.add("visible");
+
+        if (!userPausedOrbits && !isZoomedIn) {
+          targetOrbitSpeed = 0.08;
+        }
+      } else {
+        hoveredStarIndex = -1;
+        canvas.style.cursor = isDragging ? "grabbing" : "grab";
+        tooltip.classList.remove("visible");
+
+        if (!userPausedOrbits && !isZoomedIn) {
+          targetOrbitSpeed = 1.0;
+        }
+      }
+    });
+
+    window.addEventListener("pointerup", (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+
+      const moveDist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+      if (moveDist < 6 && e.target === canvas) {
+        const clickedIdx = findNearestStar(e.clientX, e.clientY);
+        if (clickedIdx !== -1) {
+          zoomToStar(clickedIdx);
+        } else if (isZoomedIn) {
+          returnToPreviousCameraView();
+        }
+      }
+    });
+
+    /* Масштабирование колесом мыши */
+    canvas.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        cam.destDistance = Math.max(4.5, Math.min(95, cam.destDistance + e.deltaY * 0.035));
+      },
+      { passive: false }
+    );
+
+    /* Масштабирование двумя пальцами на смартфонах */
+    canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length === 2) {
+          pinchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      },
+      { passive: true }
+    );
+
+    canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches.length === 2 && pinchStartDist > 0) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const delta = pinchStartDist - dist;
+          pinchStartDist = dist;
+          cam.destDistance = Math.max(4.5, Math.min(95, cam.destDistance + delta * 0.08));
+        }
+      },
+      { passive: true }
+    );
+
+    /* ============================================================================
+       ПОДЛЁТ КАМЕРЫ К ЗВЕЗДЕ С ПРИЧИНОЙ И ВОЗВРАТ В ПРЕЖНЮЮ ПОЗИЦИЮ
+       ============================================================================ */
+    function zoomToStar(index) {
+      if (index < 0) index = 99;
+      if (index >= 100) index = 0;
+
+      const st = reasonStars[index];
+      if (!st) return;
+
+      /* Сохраняем текущие координаты и ракурс камеры до первого приближения */
+      if (!isZoomedIn) {
+        cam.savedYaw = cam.destYaw;
+        cam.savedPitch = cam.destPitch;
+        cam.savedDistance = cam.destDistance;
+        cam.savedTargetX = cam.destTargetX;
+        cam.savedTargetY = cam.destTargetY;
+        cam.savedTargetZ = cam.destTargetZ;
+      }
+
+      isZoomedIn = true;
+      activeStarIndex = index;
+      targetOrbitSpeed = 0;
+
+      /* Направляем прицел камеры прямо на выбранную звезду и приближаем дистанцию */
+      cam.destTargetX = st.x;
+      cam.destTargetY = st.y;
+      cam.destTargetZ = st.z;
+      cam.destDistance = 6.2;
+
+      /* Разворачиваем камеру так, чтобы смотреть на звезду с красивого внешнего ракурса */
+      const horizontalAngle = Math.atan2(st.x, st.z);
+      cam.destYaw = horizontalAngle;
+
+      /* Приглушаем центральную надпись на время чтения карточки */
+      document.getElementById("nucleus-label").style.opacity = "0.14";
+      document.getElementById("hover-tooltip").classList.remove("visible");
+
+      /* Заполняем карточку причины */
+      discoveredSet.add(st.number);
+      document.getElementById("discovered-counter").textContent =
+        "Открыто: " + discoveredSet.size + " / 100";
+
+      const badge = document.getElementById("modal-atom-badge");
+      badge.style.background = st.palette.hex;
+      badge.style.boxShadow = "0 0 14px " + st.palette.hex;
+
+      document.getElementById("modal-number").textContent =
+        "Звезда №" + st.number + " из 100 • " + st.palette.name;
+      document.getElementById("modal-reason-text").textContent = st.reason;
+      document.getElementById("modal-progress-bar").style.width = st.number + "%";
+      document.getElementById("input-reason-num").value = st.number;
+
+      document.getElementById("reason-modal").classList.add("open");
+    }
+
+    function returnToPreviousCameraView() {
+      if (!isZoomedIn) return;
+
+      isZoomedIn = false;
+      activeStarIndex = -1;
+
+      /* Возвращаем камеру точно в те координаты и угол обзора, которые были до подлёта */
+      cam.destYaw = cam.savedYaw;
+      cam.destPitch = cam.savedPitch;
+      cam.destDistance = cam.savedDistance;
+      cam.destTargetX = cam.savedTargetX;
+      cam.destTargetY = cam.savedTargetY;
+      cam.destTargetZ = cam.savedTargetZ;
+
+      document.getElementById("reason-modal").classList.remove("open");
+      document.getElementById("nucleus-label").style.opacity = "1";
+
+      if (!userPausedOrbits) {
+        targetOrbitSpeed = 1.0;
+      }
+    }
+
+    /* Навигация по кнопкам интерфейса */
+    function setupUI() {
+      document.getElementById("btn-close-reason").addEventListener("click", returnToPreviousCameraView);
+      document.getElementById("btn-return-camera").addEventListener("click", returnToPreviousCameraView);
+
+      document.getElementById("btn-prev-reason").addEventListener("click", () => {
+        zoomToStar(activeStarIndex === -1 ? 0 : activeStarIndex - 1);
+      });
+
+      document.getElementById("btn-next-reason").addEventListener("click", () => {
+        zoomToStar(activeStarIndex === -1 ? 0 : activeStarIndex + 1);
+      });
+
+      document.getElementById("btn-random-reason").addEventListener("click", () => {
+        const randIdx = Math.floor(Math.random() * 100);
+        zoomToStar(randIdx);
+      });
+
+      const inputNum = document.getElementById("input-reason-num");
+      const triggerGoNum = () => {
+        const val = parseInt(inputNum.value, 10);
+        if (!isNaN(val) && val >= 1 && val <= 100) {
+          zoomToStar(val - 1);
+        }
+      };
+      document.getElementById("btn-go-num").addEventListener("click", triggerGoNum);
+      inputNum.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") triggerGoNum();
+      });
+
+      /* Кнопка паузы орбит */
+      document.getElementById("btn-toggle-orbit").addEventListener("click", () => {
+        userPausedOrbits = !userPausedOrbits;
+        const icon = document.getElementById("orbit-status-icon");
+        const text = document.getElementById("orbit-status-text");
+
+        if (userPausedOrbits) {
+          targetOrbitSpeed = 0;
+          icon.textContent = "▶";
+          text.textContent = "Запустить орбиты";
+        } else {
+          if (!isZoomedIn) targetOrbitSpeed = 1.0;
+          icon.textContent = "⏸";
+          text.textContent = "Пауза орбит";
+        }
+      });
+
+      /* Переключение режима свечения туманности */
+      let nebulaBright = false;
+      document.getElementById("btn-toggle-theme").addEventListener("click", () => {
+        nebulaBright = !nebulaBright;
+        document.body.classList.toggle("theme-hubble", !nebulaBright);
+        document.body.classList.toggle("theme-nebula", nebulaBright);
+        document.getElementById("theme-icon").textContent = nebulaBright ? "✨" : "🌌";
+        document.getElementById("theme-text").textContent = nebulaBright
+          ? "Глубокий космос"
+          : "Яркая туманность";
+      });
+
+      /* Список всех 100 причин */
+      const drawer = document.getElementById("all-reasons-drawer");
+      const grid = document.getElementById("reasons-grid");
+
+      REASONS.forEach((txt, idx) => {
+        const pal = STAR_PALETTES[idx % 3];
+        const btn = document.createElement("button");
+        btn.className = "reason-list-item";
+        btn.innerHTML =
+          '<span class="reason-num-circle" style="background:' +
+          pal.hex +
+          ';box-shadow:0 0 10px ' +
+          pal.hex +
+          '">' +
+          (idx + 1) +
+          '</span><span class="reason-item-text">' +
+          txt +
+          "</span>";
+
+        btn.addEventListener("click", () => {
+          drawer.classList.remove("open");
+          zoomToStar(idx);
+        });
+        grid.appendChild(btn);
+      });
+
+      document.getElementById("btn-open-list").addEventListener("click", () => {
+        drawer.classList.add("open");
+      });
+
+      document.getElementById("btn-close-drawer").addEventListener("click", () => {
+        drawer.classList.remove("open");
+      });
+
+      drawer.addEventListener("click", (e) => {
+        if (e.target === drawer) drawer.classList.remove("open");
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (drawer.classList.contains("open")) {
+            drawer.classList.remove("open");
+          } else if (isZoomedIn) {
+            returnToPreviousCameraView();
+          }
+        } else if (e.key === "ArrowRight" && isZoomedIn) {
+          zoomToStar(activeStarIndex + 1);
+        } else if (e.key === "ArrowLeft" && isZoomedIn) {
+          zoomToStar(activeStarIndex - 1);
+        }
+      });
+    }
+
+    function handleResize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    /* Старт 3D-сцены */
+    handleResize();
+    initSprites();
+    buildGalaxyScene();
+    setupUI();
+    requestAnimationFrame(renderLoop);
+  </script>
+</body>
+</html>
